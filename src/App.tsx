@@ -15,7 +15,7 @@ function App() {
           className="w-full h-[80%] p-2 border rounded resize-none"
           value={markdown}
           onChange={(e) => setMarkdown(e.target.value)}
-          placeholder="Escribe tu nota en Markdown..."
+          placeholder="Escribe tu nota..."
         />
         <button
           className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"

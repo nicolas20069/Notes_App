@@ -12,8 +12,9 @@ const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Simula `__dirname` en ESM, ya que no está disponible por defecto. Esto es útil para construir rutas absolutas.
 
-process.env.APP_ROOT = path.join(__dirname, "..");
 // Define la raíz del proyecto como variable de entorno. Se usa para construir rutas más adelante.
+process.env.APP_ROOT = path.join(__dirname, "..");
+
 
 export const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 // Esta variable se define automáticamente por Vite en modo desarrollo. Si existe, se usa para cargar el frontend desde el servidor local.
