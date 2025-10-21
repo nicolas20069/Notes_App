@@ -78,3 +78,9 @@ ipcMain.on("save-note", (event, noteContent: string) => {
   console.log("Nota Guardada:", noteContent);
 });
 
+// permite usar invoke() desde el frontend
+ipcMain.handle('load-note', () =>{
+  const saveNote = store.get('note') || ''; //devuelve la nota guardada o una cada vacia si no hay nota
+  return saveNote;
+})
+

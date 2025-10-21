@@ -74,4 +74,19 @@ Tailwind v4 se ha rediseñado para funcionar principalmente como un plugin de Po
 Por lo tanto se requieren reenombrar algunos archivos, ejemplo:  tailwind.config.js  --> tailwind.config.cjs
 
 
- 
+ ⏩AVANCES-1:
+ - El usuario escribe una nota en Markdown
+- Al hacer clic en “Guardar nota”, se ejecuta window.ipcRenderer.saveNote(markdown)
+- Esto envía el contenido al proceso principal mediante ipcMain.on('save-note', ...)
+- electron-store guarda la nota en disco
+- Se imprime en consola para confirmar que el canal funciona
+
+⏩AVANCES-2:
+- Se agrego un nuevo canal 'save-note', devuelve la ultima nota guardada.
+- Al abrir el app, se ejecuta automaticamente loadNote()
+- Se recupera la ultima nota guardada desde electron-store
+- se actualiza el edito con esa nota
+- el usuario continua escribiendo sin perder lo escrito
+
+ℹ️Ruta donde se guardan las notas:
+C:\Users\nicolas\AppData\Roaming\actividad-note-app

@@ -30,7 +30,13 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
     return ipcRenderer.invoke(channel, ...omit);
   },
 
+  // Guarda la nota echa 
   saveNote(note: string){
     ipcRenderer.send('save-note', note);
+  },
+
+  // devuleve la ultima nota
+  loadNote(){
+    return ipcRenderer.invoke('load-note')
   }
 });
