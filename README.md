@@ -32,10 +32,34 @@ export default {
 
 
 ///////////////////////////////////////////////////////////////////////////
+# 📝 NotasApp
 
-TECNOLOGIAS USADAS:
-- Electron + React + TypeScript + Tailwind + Jotai
+Aplicación de escritorio para tomar notas en formato Markdown, construida con Electron, React y Vite.
 
+## 🚀 Características
+
+- Crear, editar y eliminar notas
+- Vista previa en tiempo real con Markdown
+- Exportar notas como JSON
+- Persistencia local entre sesiones
+- Mensajes visuales con react-hot-toast
+- Interfaz responsiva con Tailwind CSS
+
+## 🛠️ Tecnologías
+
+- Electron
+- React + Jotai
+- Vite
+- Tailwind CSS
+- React Markdown
+- Electron Store
+- Electron Builder
+
+## 📦 Instalación y ejecución
+
+```bash
+npm install
+npm run dev
 
 
 🧱 Estructura base del proyecto:
@@ -58,8 +82,8 @@ Actividad-Note-App/
 - noteContent: El contenido que se envía desde el editor
 - store.set(...): Guarda la nota en disco bajo la clave 'note'
 
-
-
+* COMANDO PARA ABRIRI LA CONSOLA EN ELECTRON
+    Ctrl+Shift+I
 
 ☣️ PROBLEMAS PRESENTES Y OBSERVACIONES:
 
@@ -67,6 +91,30 @@ Actividad-Note-App/
 
 - Problema para inciar Tailwind al usar "npx tailwindcss init -p", este problema ocurre por un cambio importante en Tailwind CSS v4.x, que ya no incluye el CLI tradicional (tailwindcss/lib/cli.js). Por eso npx tailwindcss init -p y el intento de ejecutar el CLI directamente fallan.
 
+- Problema de sincronizacion entre vite y electron, vite si esta corriendo, el build de electron se completo, pero electron no esta mostrando la ventana del frontend.
+solucion: se tuvo que separar el frontend del backend, correrlos al mismo tiempo usando concurrently para ejecutar ambos procesos, se modifico el package.js, en package.json se valido de que electron ejecute directamente el archivo fuente main.ts.
+
+Compatibilidad entre Electron y Vite
+- Vite usa ESM por defecto, mientras Electron requiere CommonJS en el proceso principal.
+- Solución: configurar vite-plugin-electron y separar main.js en dist-electron.
+
+Integración de Tailwind con Electron
+- Tailwind no se aplica directamente al HTML generado por Electron.
+- Solución: usar Vite para compilar React con Tailwind y renderizar en el BrowserWindow.
+
+Persistencia con electron-store
+- Al principio, los datos no se guardaban entre sesiones.
+- Solución: implementar correctamente el puente IPC con preload.js y contextBridge.
+
+ Mensajes visuales con react-hot-toast
+- Toasts no aparecían por falta de <Toaster /> en el JSX.
+- Solución: importar y renderizar <Toaster /> en el componente raíz.
+
+Empaquetado con electron-builder
+- Advertencias por falta de description y author en package.json.
+- Solución: agregar esos campos y configurar correctamente los íconos y directorios.
+
+ 
 🧠 ¿Qué está pasando?
 Tailwind v4 se ha rediseñado para funcionar principalmente como un plugin de PostCSS, y ya no expone el CLI como antes. Por eso no puedes usar npx tailwindcss init -p ni acceder a lib/cli.js.
 
@@ -88,5 +136,6 @@ Por lo tanto se requieren reenombrar algunos archivos, ejemplo:  tailwind.config
 - se actualiza el edito con esa nota
 - el usuario continua escribiendo sin perder lo escrito
 
+
 ℹ️Ruta donde se guardan las notas:
-C:\Users\nicolas\AppData\Roaming\actividad-note-app
+C:\Users\'usuario'\AppData\Roaming\actividad-note-app

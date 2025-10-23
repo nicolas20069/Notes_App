@@ -1,86 +1,71 @@
+import { app, BrowserWindow, ipcMain } from "electron";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import Store from "electron-store";
 
-import { app, BrowserWindow, ipcMain } from "electron";
-// Importa las APIs principales de Electron: `app` para controlar el ciclo de vida de la app, y `BrowserWindow` para crear ventanas.
+//" Corrige __dirname para entornos ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-import { createRequire } from "node:module";
-import { fileURLToPath } from "node:url";
-import path from "node:path";
-// Estas utilidades permiten trabajar con rutas en proyectos ESM. `createRequire` permite usar `require()` en módulos ES.
+//" Instancia de almacenamiento local
+const store = new Store();
 
-const require = createRequire(import.meta.url);
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// Simula `__dirname` en ESM, ya que no está disponible por defecto. Esto es útil para construir rutas absolutas.
-
-// Define la raíz del proyecto como variable de entorno. Se usa para construir rutas más adelante.
-process.env.APP_ROOT = path.join(__dirname, "..");
-
-
-export const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
-// Esta variable se define automáticamente por Vite en modo desarrollo. Si existe, se usa para cargar el frontend desde el servidor local.
-
-export const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
-export const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
-// Rutas de los archivos compilados: `dist-electron` para el proceso principal, `dist` para el frontend React.
-
-process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
-  ? path.join(process.env.APP_ROOT, "public")
-  : RENDERER_DIST;
-// Define la ruta pública para íconos y otros assets. En desarrollo usa `/public`, en producción usa `/dist`.
-
-let win: BrowserWindow | null;
-// Variable global para guardar la ventana principal.
-
+//" Crea la ventana principal
 function createWindow() {
-  win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
-    // Ícono de la ventana, útil para mostrar en la barra de tareas.
-
+  const win = new BrowserWindow({
+    width: 1000,
+    height: 700,
     webPreferences: {
-      preload: path.join(__dirname, "preload.mjs"),
-      // Carga el script `preload.mjs` que expone APIs seguras al frontend.
+      preload: join(__dirname, "preload.js"), // Carga el bridge seguro
     },
   });
 
-  win.webContents.on("did-finish-load", () => {
-    win?.webContents.send("main-process-message", new Date().toLocaleString());
-    // Envía un mensaje al frontend cuando la ventana termina de cargar. Útil para pruebas o sincronización.
-  });
-
-  if (VITE_DEV_SERVER_URL) {
-    win.loadURL(VITE_DEV_SERVER_URL);
-    // En desarrollo, carga el frontend desde el servidor de Vite.
-  } else {
-    win.loadFile(path.join(RENDERER_DIST, "index.html"));
-    // En producción, carga el archivo HTML compilado.
-  }
+  //" Carga el HTML generado por Vite
+  win.loadFile(join(__dirname, "../dist-renderer/index.html"));
 }
 
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-    win = null;
-  }
+//" Guarda una nueva nota
+ipcMain.on("save-note", (_event, note) => {
+  if (!note || !note.id || !note.title) return;
+
+  const notes = store.get("notes") || [];
+  const filtered = (notes as any[]).filter((n) => n && n.id);
+  store.set("notes", [...filtered, note]);
+
+  console.log(" 👍 Nota guardada:", note);
 });
 
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
+//" Edita una nota existente
+ipcMain.on("edit-note", (_event, updatedNote) => {
+  const notes = store.get("notes") || [];
+  const filtered = (notes as any[]).filter((n) => n && n.id);
+  const newNotes = filtered.map((note) =>
+    note.id === updatedNote.id ? updatedNote : note
+  );
+  store.set("notes", newNotes);
+
+  console.log("✏️ Nota actualizada:", updatedNote);
 });
 
+//" Elimina una nota por ID
+ipcMain.on("delete-note", (_event, id) => {
+  const notes = store.get("notes") || [];
+  const filtered = (notes as any[]).filter((note) => note && note.id !== id);
+  store.set("notes", filtered);
+
+  console.log("🗑️ Nota eliminada:", id);
+});
+
+//" Carga todas las notas válidas
+ipcMain.handle("load-notes", () => {
+  const notes = store.get("notes");
+  const validNotes = Array.isArray(notes)
+    ? notes.filter((note) => note && note.id && note.content)
+    : [];
+
+  console.log("📥 Notas cargadas:", validNotes.length);
+  return validNotes;
+});
+
+//" Inicia la app cuando esté lista
 app.whenReady().then(createWindow);
-
-const store = new Store();
-// Canal para guardar una nota
-ipcMain.on("save-note", (event, noteContent: string) => {
-  store.set("note", noteContent);
-  console.log("Nota Guardada:", noteContent);
-});
-
-// permite usar invoke() desde el frontend
-ipcMain.handle('load-note', () =>{
-  const saveNote = store.get('note') || ''; //devuelve la nota guardada o una cada vacia si no hay nota
-  return saveNote;
-})
-

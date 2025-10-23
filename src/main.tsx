@@ -1,3 +1,4 @@
+/// archivo principal, para poder recopilar y lanzar la App
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
@@ -10,8 +11,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 );
 
 // Use contextBridge
-window.ipcRenderer.on("main-process-message", (_event, message) => {
-  console.log(message);
+window.api.on("main-process-message", (message: string) => {
+  console.log("Mensaje desde el proceso principal:", message);
 });
-
-

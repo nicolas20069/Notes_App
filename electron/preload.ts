@@ -1,42 +1,45 @@
-import { ipcRenderer, contextBridge } from "electron";
-// `ipcRenderer` permite enviar mensajes al proceso principal.
-// `contextBridge` permite exponer funciones al frontend sin romper el aislamiento.
+import { contextBridge, ipcRenderer } from "electron";
 
-// Expone un objeto llamado `ipcRenderer` en `window`, accesible desde React.
-contextBridge.exposeInMainWorld("ipcRenderer", {
-  // Permite escuchar eventos desde el proceso principal. Ejemplo: `window.ipcRenderer.on('note-saved', callback)`
-  on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args;
-    return ipcRenderer.on(channel, (event, ...args) =>
-      listener(event, ...args)
-    );
+contextBridge.exposeInMainWorld("api", {
+  // Escucha eventos enviados desde el proceso principal
+  on(channel: string, callback: (data: unknown) => void): void {
+    ipcRenderer.on(channel, (_event, data) => callback(data));
   },
 
-  // Permite dejar de escuchar eventos.
-  off(...args: Parameters<typeof ipcRenderer.off>) {
-    const [channel, ...omit] = args;
-    return ipcRenderer.off(channel, ...omit);
+  // Guarda una nueva nota
+  saveNote(note: {
+    id: string;
+    title: string;
+    content: string;
+    date: string;
+  }): void {
+    ipcRenderer.send("save-note", note);
   },
 
-  // Envía mensajes al proceso principal. Ejemplo: `window.ipcRenderer.send('save-note', note)`
-  send(...args: Parameters<typeof ipcRenderer.send>) {
-    const [channel, ...omit] = args;
-    return ipcRenderer.send(channel, ...omit);
+  // Carga una nota individual
+  loadNote(id: string): Promise<unknown> {
+    return ipcRenderer.invoke("load-note", id);
   },
 
-  // Envía mensajes y espera una respuesta. Ideal para operaciones asincrónicas como leer archivos o guardar notas.
-  invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-    const [channel, ...omit] = args;
-    return ipcRenderer.invoke(channel, ...omit);
+  // Carga todas las notas
+  loadNotes(): Promise<
+    Array<{ id: string; title: string; content: string; date: string }>
+  > {
+    return ipcRenderer.invoke("load-notes");
   },
 
-  // Guarda la nota echa 
-  saveNote(note: string){
-    ipcRenderer.send('save-note', note);
+  // Edita una nota existente
+  editNote(note: {
+    id: string;
+    title: string;
+    content: string;
+    date: string;
+  }): void {
+    ipcRenderer.send("edit-note", note);
   },
 
-  // devuleve la ultima nota
-  loadNote(){
-    return ipcRenderer.invoke('load-note')
-  }
+  // Elimina una nota por ID
+  deleteNote(id: string): void {
+    ipcRenderer.send("delete-note", id);
+  },
 });

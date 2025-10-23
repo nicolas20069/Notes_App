@@ -1,0 +1,1 @@
+"use strict";const n=require("electron");n.contextBridge.exposeInMainWorld("api",{on(e,o){n.ipcRenderer.on(e,(r,t)=>o(t))},saveNote(e){n.ipcRenderer.send("save-note",e)},loadNote(e){return n.ipcRenderer.invoke("load-note",e)},loadNotes(){return n.ipcRenderer.invoke("load-notes")},editNote(e){n.ipcRenderer.send("edit-note",e)},deleteNote(e){n.ipcRenderer.send("delete-note",e)}});

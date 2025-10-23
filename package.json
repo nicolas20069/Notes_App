@@ -1,19 +1,24 @@
 {
   "name": "actividad-note-app",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "main": "dist-electron/main.js",
+  "description": "Aplicación de escritorio para tomar notas en Markdown, desarrollada con Electron, React y Vite.",
+  "author": "Nicolás Melo",
+  "license": "MIT",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "dev": "cross-env NODE_ENV=development concurrently \"vite\" \"electron .\"",
+    "build": "vite build && vite build --config electron.config.ts",
+    "start": "electron .",
+    "dist": "electron-builder"
   },
   "dependencies": {
     "electron-store": "^11.0.2",
     "jotai": "^2.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.6.0",
     "react-markdown": "^10.1.0"
   },
   "devDependencies": {
@@ -24,17 +29,40 @@
     "@typescript-eslint/parser": "^7.1.1",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.21",
-    "electron": "^30.0.1",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^30.5.1",
     "electron-builder": "^24.13.3",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.15",
+    "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
     "vite": "^5.1.6",
-    "vite-plugin-electron": "^0.28.6",
-    "vite-plugin-electron-renderer": "^0.14.5"
+    "vite-plugin-electron": "^0.28.8",
+    "vite-plugin-electron-renderer": "^0.14.6"
   },
-  "main": "dist-electron/main.js"
+  "build": {
+    "appId": "com.nicolas.actividadnoteapp",
+    "productName": "NotasApp",
+    "directories": {
+      "buildResources": "assets"
+    },
+    "files": [
+      "dist",
+      "dist-electron",
+      "node_modules",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns"
+    }
+  }
 }
