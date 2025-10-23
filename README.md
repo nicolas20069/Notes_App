@@ -91,9 +91,6 @@ Actividad-Note-App/
 
 - Problema para inciar Tailwind al usar "npx tailwindcss init -p", este problema ocurre por un cambio importante en Tailwind CSS v4.x, que ya no incluye el CLI tradicional (tailwindcss/lib/cli.js). Por eso npx tailwindcss init -p y el intento de ejecutar el CLI directamente fallan.
 
-- Problema de sincronizacion entre vite y electron, vite si esta corriendo, el build de electron se completo, pero electron no esta mostrando la ventana del frontend.
-solucion: se tuvo que separar el frontend del backend, correrlos al mismo tiempo usando concurrently para ejecutar ambos procesos, se modifico el package.js, en package.json se valido de que electron ejecute directamente el archivo fuente main.ts.
-
 Compatibilidad entre Electron y Vite
 - Vite usa ESM por defecto, mientras Electron requiere CommonJS en el proceso principal.
 - Solución: configurar vite-plugin-electron y separar main.js en dist-electron.
